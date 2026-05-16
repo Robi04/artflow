@@ -33,6 +33,9 @@ export const useCompleteProject = () => {
   return useMutation({
     mutationFn: (projectId: string) =>
       api.patch(`/long-projects/${projectId}/complete`).then((r) => r.data),
-    onSuccess: () => qc.invalidateQueries({ queryKey: ['long-projects'] }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['long-projects'] });
+      qc.invalidateQueries({ queryKey: ['badges', 'me'] });
+    },
   });
 };
