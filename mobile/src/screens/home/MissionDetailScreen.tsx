@@ -3,6 +3,7 @@ import { Alert, Image, ScrollView, Text, TouchableOpacity, View, ActivityIndicat
 import * as ImagePicker from 'expo-image-picker';
 import { useSubmitMission } from '../../api/missions';
 import { useAuthStore } from '../../store/auth.store';
+import { pickImageOrCamera } from '../../utils/pickImage';
 
 export default function MissionDetailScreen({ route, navigation }: any) {
   const { mission } = route.params;
@@ -11,11 +12,8 @@ export default function MissionDetailScreen({ route, navigation }: any) {
   const refreshUser = useAuthStore((s) => s.refreshUser);
 
   const pickImage = async () => {
-    const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
-      quality: 0.8,
-    });
-    if (!result.canceled) setImage(result.assets[0]);
+    const asset = await pickImageOrCamera();
+    if (asset) setImage(asset);
   };
 
   const handleSubmit = async () => {

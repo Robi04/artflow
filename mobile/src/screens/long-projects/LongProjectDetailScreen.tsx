@@ -1,8 +1,8 @@
 import { ActivityIndicator, Alert, FlatList, Image, ScrollView, Text, TouchableOpacity, View } from 'react-native';
-import * as ImagePicker from 'expo-image-picker';
 import { useQuery } from '@tanstack/react-query';
 import { api } from '../../api/client';
 import { useAddPhoto, useCompleteProject } from '../../api/longProjects';
+import { pickImageOrCamera } from '../../utils/pickImage';
 
 export default function LongProjectDetailScreen({ route, navigation }: any) {
   const { projectId } = route.params;
@@ -14,13 +14,10 @@ export default function LongProjectDetailScreen({ route, navigation }: any) {
   const complete = useCompleteProject();
 
   const handleAddPhoto = async () => {
-    const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
-      quality: 0.8,
-    });
-    if (result.canceled) return;
+    const asset = await pickImageOrCamera();
+    if (!asset) return;
     try {
-      await addPhoto.mutateAsync({ projectId, image: result.assets[0] });
+      await addPhoto.mutateAsync({ projectId, image: asset });
     } catch {
       Alert.alert('Erreur', "Impossible d'ajouter la photo");
     }
