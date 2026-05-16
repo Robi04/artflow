@@ -40,6 +40,11 @@ export class LongProjectsController {
     return this.projects.complete(user.id, id);
   }
 
+  @Patch(':id/archive')
+  archive(@CurrentUser() user: any, @Param('id') id: string) {
+    return this.projects.archive(user.id, id);
+  }
+
   @Delete(':id')
   delete(@CurrentUser() user: any, @Param('id') id: string) {
     return this.projects.delete(user.id, id);

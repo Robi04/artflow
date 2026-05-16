@@ -1,7 +1,7 @@
 import { ActivityIndicator, Alert, FlatList, Image, ScrollView, Text, TouchableOpacity, View } from 'react-native';
 import { useQuery } from '@tanstack/react-query';
 import { api } from '../../api/client';
-import { useAddPhoto, useCompleteProject } from '../../api/longProjects';
+import { useAddPhoto, useArchiveProject, useCompleteProject } from '../../api/longProjects';
 import { pickImageOrCamera } from '../../utils/pickImage';
 
 export default function LongProjectDetailScreen({ route, navigation }: any) {
@@ -12,6 +12,7 @@ export default function LongProjectDetailScreen({ route, navigation }: any) {
   });
   const addPhoto = useAddPhoto();
   const complete = useCompleteProject();
+  const archive = useArchiveProject();
 
   const handleAddPhoto = async () => {
     const asset = await pickImageOrCamera();
@@ -43,6 +44,7 @@ export default function LongProjectDetailScreen({ route, navigation }: any) {
   if (!project) return null;
 
   const isCompleted = project.status === 'COMPLETED';
+  const isArchived = project.status === 'ARCHIVED';
 
   return (
     <ScrollView className="flex-1 bg-bg" contentContainerStyle={{ padding: 20 }}>
@@ -51,8 +53,8 @@ export default function LongProjectDetailScreen({ route, navigation }: any) {
         {project.description && <Text className="text-muted">{project.description}</Text>}
         <View className="flex-row justify-between mt-3">
           <Text className="text-muted text-sm">{project.photos?.length ?? 0} photo(s)</Text>
-          <Text style={{ color: isCompleted ? '#22c55e' : '#f59e0b', fontSize: 12, fontWeight: '600' }}>
-            {isCompleted ? '✅ Terminé' : '🔄 En cours'}
+          <Text style={{ color: isCompleted ? '#22c55e' : isArchived ? '#71717a' : '#f59e0b', fontSize: 12, fontWeight: '600' }}>
+            {isCompleted ? '✅ Terminé' : isArchived ? '📦 Archivé' : '🔄 En cours'}
           </Text>
         </View>
       </View>
@@ -75,7 +77,7 @@ export default function LongProjectDetailScreen({ route, navigation }: any) {
         </View>
       )}
 
-      {!isCompleted && (
+      {!isCompleted && !isArchived && (
         <View className="gap-3">
           <TouchableOpacity
             className="bg-card rounded-xl py-4 items-center border border-border"
@@ -88,6 +90,18 @@ export default function LongProjectDetailScreen({ route, navigation }: any) {
           </TouchableOpacity>
           <TouchableOpacity className="bg-green-800 rounded-xl py-4 items-center" onPress={handleComplete}>
             <Text className="text-white font-semibold">✅ Marquer comme terminé</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            className="rounded-xl py-4 items-center border border-border"
+            style={{ backgroundColor: '#1a1a1a' }}
+            onPress={() => {
+              Alert.alert('Archiver le projet ?', 'Il sera déplacé dans les archives et tu pourras le consulter à tout moment.', [
+                { text: 'Annuler', style: 'cancel' },
+                { text: 'Archiver', onPress: () => archive.mutateAsync(projectId).then(() => navigation.goBack()) },
+              ]);
+            }}
+          >
+            <Text className="text-muted font-semibold">📦 Archiver</Text>
           </TouchableOpacity>
         </View>
       )}

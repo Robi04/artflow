@@ -96,6 +96,15 @@ Return ONLY a JSON object with:
     return { project: updated, newBadges };
   }
 
+  async archive(userId: string, projectId: string) {
+    const project = await this.prisma.longProject.findUnique({ where: { id: projectId } });
+    this.assertOwner(project, userId);
+    return this.prisma.longProject.update({
+      where: { id: projectId },
+      data: { status: 'ARCHIVED' },
+    });
+  }
+
   async delete(userId: string, projectId: string) {
     const project = await this.prisma.longProject.findUnique({ where: { id: projectId } });
     this.assertOwner(project, userId);

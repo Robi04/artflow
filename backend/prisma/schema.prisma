@@ -26,6 +26,7 @@ enum MissionStatus {
 enum LongProjectStatus {
   IN_PROGRESS
   COMPLETED
+  ARCHIVED
 }
 
 enum BadgeCondition {

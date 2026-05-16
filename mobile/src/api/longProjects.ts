@@ -42,3 +42,12 @@ export const useCompleteProject = () => {
     },
   });
 };
+
+export const useArchiveProject = () => {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (projectId: string) =>
+      api.patch(`/long-projects/${projectId}/archive`).then((r) => r.data),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['long-projects'] }),
+  });
+};

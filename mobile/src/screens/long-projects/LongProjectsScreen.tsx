@@ -12,6 +12,7 @@ export default function LongProjectsScreen({ navigation }: any) {
   const { data, isLoading } = useLongProjects();
   const createProject = useCreateLongProject();
   const [modalVisible, setModalVisible] = useState(false);
+  const [archivesVisible, setArchivesVisible] = useState(false);
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
 
@@ -27,16 +28,20 @@ export default function LongProjectsScreen({ navigation }: any) {
 
   const inProgress = data?.filter((p: any) => p.status === 'IN_PROGRESS') ?? [];
   const completed = data?.filter((p: any) => p.status === 'COMPLETED') ?? [];
+  const archived = data?.filter((p: any) => p.status === 'ARCHIVED') ?? [];
 
   const renderCard = (project: any) => {
     const cover = project.photos?.[project.photos.length - 1]?.imageUrl ?? null;
     const isCompleted = project.status === 'COMPLETED';
+    const isArchived = project.status === 'ARCHIVED';
+    const badgeColor = isCompleted ? '#22c55ecc' : isArchived ? '#71717acc' : '#f59e0bcc';
+    const badgeLabel = isCompleted ? '✅ Terminé' : isArchived ? '📦 Archivé' : '🔄 En cours';
 
     return (
       <TouchableOpacity
         key={project.id}
         onPress={() => navigation.navigate('LongProjectDetail', { projectId: project.id })}
-        style={{ width: cardWidth, marginBottom: COLUMN_GAP }}
+        style={{ width: cardWidth, marginBottom: COLUMN_GAP, opacity: isArchived ? 0.6 : 1 }}
       >
         {/* Cover */}
         <View style={{ width: cardWidth, height: cardWidth, borderRadius: 16, overflow: 'hidden', backgroundColor: '#1a1a1a', marginBottom: 8 }}>
@@ -46,11 +51,11 @@ export default function LongProjectsScreen({ navigation }: any) {
           {/* Status badge */}
           <View style={{
             position: 'absolute', top: 8, right: 8,
-            backgroundColor: isCompleted ? '#22c55ecc' : '#f59e0bcc',
+            backgroundColor: badgeColor,
             borderRadius: 8, paddingHorizontal: 6, paddingVertical: 2,
           }}>
             <Text style={{ color: '#fff', fontSize: 10, fontWeight: '600' }}>
-              {isCompleted ? '✅ Terminé' : '🔄 En cours'}
+              {badgeLabel}
             </Text>
           </View>
           {/* Photo count */}
@@ -110,6 +115,26 @@ export default function LongProjectsScreen({ navigation }: any) {
               {completed.map(renderCard)}
             </View>
           </>
+        )}
+
+        {/* Archives */}
+        {archived.length > 0 && (
+          <View style={{ marginTop: 16 }}>
+            <TouchableOpacity
+              onPress={() => setArchivesVisible((v) => !v)}
+              style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: archivesVisible ? 12 : 0 }}
+            >
+              <Text className="text-muted text-xs font-semibold uppercase tracking-wider">
+                Archives ({archived.length})
+              </Text>
+              <Text style={{ color: '#71717a', fontSize: 12 }}>{archivesVisible ? '▲' : '▼'}</Text>
+            </TouchableOpacity>
+            {archivesVisible && (
+              <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: COLUMN_GAP }}>
+                {archived.map(renderCard)}
+              </View>
+            )}
+          </View>
         )}
       </ScrollView>
 
