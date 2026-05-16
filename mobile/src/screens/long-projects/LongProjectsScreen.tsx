@@ -42,11 +42,7 @@ export default function LongProjectsScreen({ navigation }: any) {
         <View style={{ width: cardWidth, height: cardWidth, borderRadius: 16, overflow: 'hidden', backgroundColor: '#1a1a1a', marginBottom: 8 }}>
           {cover ? (
             <Image source={{ uri: cover }} style={{ width: '100%', height: '100%' }} resizeMode="cover" />
-          ) : (
-            <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
-              <Text style={{ fontSize: 32 }}>🎨</Text>
-            </View>
-          )}
+          ) : null}
           {/* Status badge */}
           <View style={{
             position: 'absolute', top: 8, right: 8,
