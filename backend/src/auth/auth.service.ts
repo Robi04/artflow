@@ -36,6 +36,15 @@ export class AuthService {
     return this.signToken(user.id, user.email);
   }
 
+  async updateProfile(userId: string, name: string) {
+    const user = await this.prisma.user.update({
+      where: { id: userId },
+      data: { name },
+    });
+    const { passwordHash, ...rest } = user;
+    return rest;
+  }
+
   async updateAvatar(userId: string, file: Express.Multer.File) {
     const avatarUrl = await this.supabase.uploadImage(file, 'avatars');
     const user = await this.prisma.user.update({

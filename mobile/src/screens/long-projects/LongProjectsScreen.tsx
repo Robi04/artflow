@@ -1,6 +1,12 @@
 import { useState } from 'react';
-import { ActivityIndicator, Alert, Modal, ScrollView, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { ActivityIndicator, Alert, Dimensions, Image, Modal, ScrollView, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { useLongProjects, useCreateLongProject } from '../../api/longProjects';
+
+const COLUMN_GAP = 12;
+const SCREEN_PADDING = 20;
+const NUM_COLUMNS = 2;
+const screenWidth = Dimensions.get('window').width;
+const cardWidth = (screenWidth - SCREEN_PADDING * 2 - COLUMN_GAP) / NUM_COLUMNS;
 
 export default function LongProjectsScreen({ navigation }: any) {
   const { data, isLoading } = useLongProjects();
@@ -19,9 +25,61 @@ export default function LongProjectsScreen({ navigation }: any) {
     }
   };
 
+  const inProgress = data?.filter((p: any) => p.status === 'IN_PROGRESS') ?? [];
+  const completed = data?.filter((p: any) => p.status === 'COMPLETED') ?? [];
+
+  const renderCard = (project: any) => {
+    const cover = project.photos?.[project.photos.length - 1]?.imageUrl ?? null;
+    const isCompleted = project.status === 'COMPLETED';
+
+    return (
+      <TouchableOpacity
+        key={project.id}
+        onPress={() => navigation.navigate('LongProjectDetail', { projectId: project.id })}
+        style={{ width: cardWidth, marginBottom: COLUMN_GAP }}
+      >
+        {/* Cover */}
+        <View style={{ width: cardWidth, height: cardWidth, borderRadius: 16, overflow: 'hidden', backgroundColor: '#1a1a1a', marginBottom: 8 }}>
+          {cover ? (
+            <Image source={{ uri: cover }} style={{ width: '100%', height: '100%' }} resizeMode="cover" />
+          ) : (
+            <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
+              <Text style={{ fontSize: 32 }}>🎨</Text>
+            </View>
+          )}
+          {/* Status badge */}
+          <View style={{
+            position: 'absolute', top: 8, right: 8,
+            backgroundColor: isCompleted ? '#22c55ecc' : '#f59e0bcc',
+            borderRadius: 8, paddingHorizontal: 6, paddingVertical: 2,
+          }}>
+            <Text style={{ color: '#fff', fontSize: 10, fontWeight: '600' }}>
+              {isCompleted ? '✅ Terminé' : '🔄 En cours'}
+            </Text>
+          </View>
+          {/* Photo count */}
+          {project.photos?.length > 0 && (
+            <View style={{
+              position: 'absolute', bottom: 8, left: 8,
+              backgroundColor: 'rgba(0,0,0,0.6)',
+              borderRadius: 8, paddingHorizontal: 6, paddingVertical: 2,
+            }}>
+              <Text style={{ color: '#fff', fontSize: 10 }}>📷 {project.photos.length}</Text>
+            </View>
+          )}
+        </View>
+
+        <Text style={{ color: '#fff', fontWeight: '600', fontSize: 13 }} numberOfLines={1}>{project.title}</Text>
+        {project.description ? (
+          <Text style={{ color: '#71717a', fontSize: 11, marginTop: 2 }} numberOfLines={2}>{project.description}</Text>
+        ) : null}
+      </TouchableOpacity>
+    );
+  };
+
   return (
     <View className="flex-1 bg-bg">
-      <ScrollView contentContainerStyle={{ padding: 20 }}>
+      <ScrollView contentContainerStyle={{ padding: SCREEN_PADDING }}>
         <View className="flex-row items-center justify-between mt-10 mb-6">
           <Text className="text-white text-2xl font-bold">Mes projets</Text>
           <TouchableOpacity className="bg-primary rounded-xl px-4 py-2" onPress={() => setModalVisible(true)}>
@@ -31,33 +89,31 @@ export default function LongProjectsScreen({ navigation }: any) {
 
         {isLoading && <ActivityIndicator color="#7c3aed" />}
 
-        {data?.map((project: any) => (
-          <TouchableOpacity
-            key={project.id}
-            className="bg-card rounded-2xl p-4 mb-3 border border-border"
-            onPress={() => navigation.navigate('LongProjectDetail', { projectId: project.id })}
-          >
-            <View className="flex-row items-center justify-between mb-2">
-              <Text className="text-white font-semibold flex-1" numberOfLines={1}>{project.title}</Text>
-              <View
-                className="rounded-full px-3 py-1 ml-2"
-                style={{ backgroundColor: project.status === 'COMPLETED' ? '#22c55e22' : '#f59e0b22' }}
-              >
-                <Text style={{ color: project.status === 'COMPLETED' ? '#22c55e' : '#f59e0b', fontSize: 11 }}>
-                  {project.status === 'COMPLETED' ? 'Terminé' : 'En cours'}
-                </Text>
-              </View>
-            </View>
-            {project.description && <Text className="text-muted text-sm" numberOfLines={2}>{project.description}</Text>}
-            <Text className="text-muted text-xs mt-2">{project.photos?.length ?? 0} photo(s)</Text>
-          </TouchableOpacity>
-        ))}
-
-        {data?.length === 0 && (
+        {data?.length === 0 && !isLoading && (
           <View className="items-center mt-20">
             <Text className="text-4xl mb-3">🎨</Text>
             <Text className="text-muted text-center">Lance ton premier projet long terme !</Text>
           </View>
+        )}
+
+        {/* En cours */}
+        {inProgress.length > 0 && (
+          <>
+            <Text className="text-muted text-xs font-semibold uppercase tracking-wider mb-3">En cours</Text>
+            <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: COLUMN_GAP, marginBottom: 12 }}>
+              {inProgress.map(renderCard)}
+            </View>
+          </>
+        )}
+
+        {/* Terminés */}
+        {completed.length > 0 && (
+          <>
+            <Text className="text-muted text-xs font-semibold uppercase tracking-wider mb-3 mt-2">Terminés</Text>
+            <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: COLUMN_GAP }}>
+              {completed.map(renderCard)}
+            </View>
+          </>
         )}
       </ScrollView>
 

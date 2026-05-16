@@ -9,6 +9,9 @@ export const authApi = {
 
   me: () => api.get('/auth/me').then((r) => r.data),
 
+  updateProfile: (name: string) =>
+    api.patch('/auth/profile', { name }).then((r) => r.data),
+
   uploadAvatar: (uri: string, mimeType: string) => {
     const form = new FormData();
     const filename = uri.split('/').pop() ?? 'avatar.jpg';
