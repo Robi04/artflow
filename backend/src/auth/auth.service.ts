@@ -2,12 +2,17 @@ import { ConflictException, Injectable, UnauthorizedException } from '@nestjs/co
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
 import { PrismaService } from '../prisma/prisma.service';
+import { SupabaseService } from '../supabase/supabase.service';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
 
 @Injectable()
 export class AuthService {
-  constructor(private prisma: PrismaService, private jwt: JwtService) {}
+  constructor(
+    private prisma: PrismaService,
+    private jwt: JwtService,
+    private supabase: SupabaseService,
+  ) {}
 
   async register(dto: RegisterDto) {
     const existing = await this.prisma.user.findUnique({ where: { email: dto.email } });
@@ -29,6 +34,16 @@ export class AuthService {
     if (!valid) throw new UnauthorizedException('Invalid credentials');
 
     return this.signToken(user.id, user.email);
+  }
+
+  async updateAvatar(userId: string, file: Express.Multer.File) {
+    const avatarUrl = await this.supabase.uploadImage(file, 'avatars');
+    const user = await this.prisma.user.update({
+      where: { id: userId },
+      data: { avatarUrl },
+    });
+    const { passwordHash, ...rest } = user;
+    return rest;
   }
 
   private signToken(userId: string, email: string) {
