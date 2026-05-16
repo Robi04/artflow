@@ -24,7 +24,10 @@ export const useAddPhoto = () => {
         headers: { 'Content-Type': 'multipart/form-data' },
       }).then((r) => r.data);
     },
-    onSuccess: (_, { projectId }) => qc.invalidateQueries({ queryKey: ['long-projects', projectId] }),
+    onSuccess: (_, { projectId }) => {
+      qc.invalidateQueries({ queryKey: ['long-projects', projectId] });
+      qc.invalidateQueries({ queryKey: ['long-projects'] });
+    },
   });
 };
 
