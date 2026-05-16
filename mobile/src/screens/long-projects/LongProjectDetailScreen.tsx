@@ -77,20 +77,24 @@ export default function LongProjectDetailScreen({ route, navigation }: any) {
         </View>
       )}
 
-      {!isCompleted && !isArchived && (
+      {!isArchived && (
         <View className="gap-3">
-          <TouchableOpacity
-            className="bg-card rounded-xl py-4 items-center border border-border"
-            onPress={handleAddPhoto} disabled={addPhoto.isPending}
-          >
-            {addPhoto.isPending
-              ? <ActivityIndicator color="#7c3aed" />
-              : <Text className="text-white font-semibold">📷 Ajouter une photo</Text>
-            }
-          </TouchableOpacity>
-          <TouchableOpacity className="bg-green-800 rounded-xl py-4 items-center" onPress={handleComplete}>
-            <Text className="text-white font-semibold">✅ Marquer comme terminé</Text>
-          </TouchableOpacity>
+          {!isCompleted && (
+            <>
+              <TouchableOpacity
+                className="bg-card rounded-xl py-4 items-center border border-border"
+                onPress={handleAddPhoto} disabled={addPhoto.isPending}
+              >
+                {addPhoto.isPending
+                  ? <ActivityIndicator color="#7c3aed" />
+                  : <Text className="text-white font-semibold">📷 Ajouter une photo</Text>
+                }
+              </TouchableOpacity>
+              <TouchableOpacity className="bg-green-800 rounded-xl py-4 items-center" onPress={handleComplete}>
+                <Text className="text-white font-semibold">✅ Marquer comme terminé</Text>
+              </TouchableOpacity>
+            </>
+          )}
           <TouchableOpacity
             className="rounded-xl py-4 items-center border border-border"
             style={{ backgroundColor: '#1a1a1a' }}
